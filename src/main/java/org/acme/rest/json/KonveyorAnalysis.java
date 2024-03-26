@@ -1,6 +1,7 @@
 package org.acme.rest.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -19,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Path("/konveyor")
@@ -34,6 +35,12 @@ public class KonveyorAnalysis {
     @Inject
     @RestClient
     KonveyorService konveyorService;
+
+    @Inject
+    YardService yardService;
+
+    @Inject
+    ObjectMapper jsonMapper;
 
     @POST
     @Path("/score")
@@ -63,13 +70,14 @@ public class KonveyorAnalysis {
     @GET
     @Path("/{id}/analysis")
     @Consumes(MediaType.APPLICATION_JSON)
-    public int countByCategory(@PathParam("id") int id, @QueryParam("category") List<String> categories)
+    public JsonNode analysis(@PathParam("id") int id, @QueryParam("category") List<String> categories)
             throws JsonQueryException {
         ObjectNode analysis = konveyorService.analysis(id);
 
         int score = countByCategory(analysis, categories);
+        Map<String, Object> mandatoryIssues = yardService.callYardDT(Map.of("mandatoryIssues", score));
 
-        return score;
+        return jsonMapper.valueToTree(mandatoryIssues).get("konveyorScoreCard");
     }
 
 }
