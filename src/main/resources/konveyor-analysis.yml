@@ -1,0 +1,20 @@
+specVersion: alpha
+kind: YaRD
+name: 'Konveyor Analysis'
+inputs:
+  - name: 'mandatoryIssues'
+    type: integer
+elements:
+  - name: 'konveyorScoreCard'
+    type: Decision
+    requirements: [ 'mandatoryIssues' ]
+    logic:
+      type: DecisionTable
+      inputs: [ 'mandatoryIssues' ]
+      rules:
+        - when: ['>=5']
+          then: 0 # Bronze
+        - when: ['>=2']
+          then: 50 # silver
+        - when: ['=0']
+          then: 100
