@@ -14,7 +14,7 @@ elements:
       rules:
         - when: ['>=5']
           then: 0 # Bronze
-        - when: ['>=2']
+        - when: ['[2..4)']
           then: 50 # silver
         - when: ['=0']
           then: 100

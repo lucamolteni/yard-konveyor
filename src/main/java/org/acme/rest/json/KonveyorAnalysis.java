@@ -68,16 +68,32 @@ public class KonveyorAnalysis {
     }
 
     @GET
+    @Path("/{id}/score")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public JsonNode score(@PathParam("id") int id, @QueryParam("category") List<String> categories)
+            throws JsonQueryException {
+        int mandatoryIssuesCount = count(id, categories);
+        Map<String, Object> score = yardService.callYardDT(
+                Map.of("mandatoryIssues", mandatoryIssuesCount));
+        return jsonMapper.valueToTree(score).get("konveyorScoreCard");
+    }
+
+    @GET
+    @Path("/{id}/count")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public int count(@PathParam("id") int id, @QueryParam("category") List<String> categories)
+            throws JsonQueryException {
+        ObjectNode analysis = konveyorService.analysis(id);
+        return countByCategory(analysis, categories);
+    }
+
+    @GET
     @Path("/{id}/analysis")
     @Consumes(MediaType.APPLICATION_JSON)
     public JsonNode analysis(@PathParam("id") int id, @QueryParam("category") List<String> categories)
             throws JsonQueryException {
-        ObjectNode analysis = konveyorService.analysis(id);
 
-        int score = countByCategory(analysis, categories);
-        Map<String, Object> mandatoryIssues = yardService.callYardDT(Map.of("mandatoryIssues", score));
-
-        return jsonMapper.valueToTree(mandatoryIssues).get("konveyorScoreCard");
+        return konveyorService.analysis(id);
     }
 
 }
